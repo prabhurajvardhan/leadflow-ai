@@ -42,7 +42,13 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = None
     ANTHROPIC_API_KEY: Optional[str] = None
     OPENROUTER_API_KEY: Optional[str] = None
-    DEFAULT_AI_PROVIDER: str = "openrouter"
+    DEFAULT_AI_PROVIDER: str = "bedrock"  # Options: bedrock, openrouter, anthropic, openai
+    
+    # Amazon Bedrock
+    AWS_ACCESS_KEY_ID: Optional[str] = None
+    AWS_SECRET_ACCESS_KEY: Optional[str] = None
+    AWS_REGION: str = "us-east-1"
+    BEDROCK_MODEL_ID: str = "us.amazon.nova-micro-v1:0"
     
     # OpenRouter specific
     OPENROUTER_BASE_URL: str = "https://openrouter.ai/api/v1"

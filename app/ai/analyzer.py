@@ -2,6 +2,7 @@ from typing import Dict, Any, Optional, List
 import json
 from app.ai.providers.base import BaseAIProvider, AIResponse, Message
 from app.ai.providers.openrouter import OpenRouterProvider
+from app.ai.providers.bedrock import BedrockAIProvider
 from app.ai.templates.prompts import (
     ANALYSIS_SYSTEM_PROMPT,
     analysis_prompt,
@@ -11,8 +12,20 @@ from app.ai.templates.prompts import (
     opportunity_prompt
 )
 from app.core.logger import get_logger
+from app.core.config import settings
 
 logger = get_logger("ai_analyzer")
+
+
+def get_ai_provider() -> BaseAIProvider:
+    """Get the configured AI provider."""
+    provider_type = settings.DEFAULT_AI_PROVIDER.lower()
+    
+    if provider_type == "bedrock":
+        return BedrockAIProvider()
+    elif provider_type == "openrouter":
+        return OpenRouterProvider()
+    return BedrockAIProvider()  # Default: Bedrock with Nova Micro
 
 
 class AIAnalyzer:
@@ -23,7 +36,7 @@ class AIAnalyzer:
     """
     
     def __init__(self, provider: BaseAIProvider = None):
-        self.provider = provider or OpenRouterProvider()
+        self.provider = provider or get_ai_provider()
         self.logger = logger
     
     async def analyze_lead(self, lead_data: Dict[str, Any]) -> Dict[str, Any]:

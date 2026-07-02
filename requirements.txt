@@ -29,6 +29,7 @@ selectolax==0.3.22
 openai==1.12.0
 anthropic==0.18.0
 httpx[aiohttp]
+boto3==1.34.34
 
 # Email
 aiosmtplib==3.0.1
