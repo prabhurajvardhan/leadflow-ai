@@ -3,7 +3,7 @@ import asyncio
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.collectors.base import BaseCollector, CollectedLead
-from app.collectors.google_maps.collector import GoogleMapsCollector
+from app.collectors.openstreetmap.collector import OpenStreetMapCollector
 from app.collectors.websites.collector import WebsiteCollector
 from app.crawler.crawler import WebsiteCrawler
 from app.ai.analyzer import AIAnalyzer
@@ -201,15 +201,17 @@ class PipelineOrchestrator:
         query: str,
         location: str = None,
         max_leads: int = 100,
-        source: str = "google_maps"
+        source: str = "openstreetmap"
     ) -> List[CollectedLead]:
         """Collect leads from configured sources."""
         collector: BaseCollector
         
-        if source == "google_maps":
+        if source == "openstreetmap":
+            collector = OpenStreetMapCollector()
+        elif source == "google_maps":
             collector = GoogleMapsCollector()
         else:
-            collector = GoogleMapsCollector()  # Default
+            collector = OpenStreetMapCollector()  # Default to OSM
         
         return await collector.collect(query, location=location, max_results=max_leads)
     
