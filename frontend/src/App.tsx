@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import Leads from './pages/Leads'
 import Campaigns from './pages/Campaigns'
 import Layout from './components/Layout'
+import Landing from './pages/Landing'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,9 +32,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route
-            path="/"
+            path="/app"
             element={
               <ProtectedRoute>
                 <Layout />

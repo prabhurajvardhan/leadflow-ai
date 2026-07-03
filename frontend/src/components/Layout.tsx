@@ -1,67 +1,160 @@
-import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../hooks/useAuth'
-import { LayoutDashboard, Users, Mail, LogOut, Settings } from 'lucide-react'
-
-const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Leads', href: '/leads', icon: Users },
-  { name: 'Campaigns', href: '/campaigns', icon: Mail },
-]
+import { 
+  LayoutDashboard, Users, Send, Settings, LogOut, 
+  ChevronDown, Bell, Search, Zap, Menu, X
+} from 'lucide-react'
+import { useState } from 'react'
 
 export default function Layout() {
   const location = useLocation()
-  const { user, logout } = useAuthStore()
+  const navigate = useNavigate()
+  const { logout, user } = useAuthStore()
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const navItems = [
+    { path: '/app', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/app/leads', label: 'Leads', icon: Users },
+    { path: '/app/campaigns', label: 'Campaigns', icon: Send },
+    { path: '/app/settings', label: 'Settings', icon: Settings },
+  ]
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Top Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 justify-between">
-            <div className="flex">
-              <div className="flex flex-shrink-0 items-center">
-                <span className="text-xl font-bold text-primary-600">LeadFlow AI</span>
-              </div>
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                {navigation.map((item) => {
-                  const isActive = location.pathname === item.href
-                  return (
-                    <Link
-                      key={item.name}
-                      to={item.href}
-                      className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium ${
-                        isActive
-                          ? 'border-primary-500 text-gray-900'
-                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                      }`}
-                    >
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {item.name}
-                    </Link>
-                  )
-                })}
-              </div>
+    <div className="min-h-screen bg-[#0a0a0f] text-white flex">
+      {/* Sidebar */}
+      <aside className="hidden lg:flex flex-col w-64 border-r border-white/10 bg-[#0d0d14]">
+        {/* Logo */}
+        <div className="p-6 border-b border-white/10">
+          <Link to="/app" className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+              <Zap className="w-5 h-5 text-white" />
             </div>
-            <div className="flex items-center">
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-700">{user?.email}</span>
-                <button
-                  onClick={logout}
-                  className="rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500"
+            <span className="text-lg font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+              LeadFlow AI
+            </span>
+          </Link>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-1">
+          {navItems.map((item) => {
+            const Icon = item.icon
+            const isActive = location.pathname === item.path
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                  isActive 
+                    ? 'bg-gradient-to-r from-purple-600/20 to-blue-600/20 text-white border border-purple-500/30' 
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* User Profile */}
+        <div className="p-4 border-t border-white/10">
+          <div className="relative">
+            <button
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors"
+            >
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center text-sm font-bold">
+                {user?.email?.[0]?.toUpperCase() || 'U'}
+              </div>
+              <div className="flex-1 text-left">
+                <p className="font-medium text-sm">{user?.email || 'User'}</p>
+                <p className="text-xs text-gray-500">Free Plan</p>
+              </div>
+              <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isProfileOpen && (
+              <div className="absolute bottom-full left-0 right-0 mb-2 py-2 rounded-xl bg-[#1a1a24] border border-white/10 shadow-xl">
+                <Link 
+                  to="/app/settings"
+                  className="flex items-center gap-3 px-4 py-2 text-sm text-gray-400 hover:text-white hover:bg-white/5"
                 >
-                  <LogOut className="h-5 w-5" />
+                  <Settings className="w-4 h-4" />
+                  Settings
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
                 </button>
               </div>
-            </div>
+            )}
           </div>
         </div>
-      </nav>
+      </aside>
+
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[#0d0d14] border-b border-white/10">
+        <div className="flex items-center justify-between px-4 py-3">
+          <Link to="/app" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+              <Zap className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-bold">LeadFlow</span>
+          </Link>
+          <button 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-2 rounded-lg hover:bg-white/10"
+          >
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <nav className="p-4 border-t border-white/10 space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const isActive = location.pathname === item.path
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                    isActive 
+                      ? 'bg-gradient-to-r from-purple-600/20 to-blue-600/20 text-white' 
+                      : 'text-gray-400'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              )
+            })}
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Sign Out</span>
+            </button>
+          </nav>
+        )}
+      </div>
 
       {/* Main Content */}
-      <main className="py-6">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Outlet />
-        </div>
+      <main className="flex-1 lg:p-8 p-4 pt-20 lg:pt-8 overflow-y-auto">
+        <Outlet />
       </main>
     </div>
   )

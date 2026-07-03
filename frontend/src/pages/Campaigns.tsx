@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Plus, Mail, Users, Play, Pause, BarChart3, Send } from 'lucide-react'
+import { Plus, Mail, Users, Play, Pause, BarChart3, Send, TrendingUp, Eye, MessageCircle } from 'lucide-react'
 
 interface Campaign {
   id: number
@@ -14,98 +14,137 @@ interface Campaign {
 
 const campaigns: Campaign[] = []
 
-const STATUS_STYLES: Record<string, { bg: string; text: string }> = {
-  draft: { bg: 'bg-gray-100', text: 'text-gray-700' },
-  scheduled: { bg: 'bg-blue-100', text: 'text-blue-700' },
-  running: { bg: 'bg-green-100', text: 'text-green-700' },
-  paused: { bg: 'bg-yellow-100', text: 'text-yellow-700' },
-  completed: { bg: 'bg-purple-100', text: 'text-purple-700' },
-  failed: { bg: 'bg-red-100', text: 'text-red-700' },
-}
-
 export default function Campaigns() {
   const [showCreateModal, setShowCreateModal] = useState(false)
 
+  const stats = [
+    { 
+      label: 'Total Sent', 
+      value: campaigns.reduce((acc, c) => acc + c.sent_count, 0),
+      icon: Send,
+      gradient: 'from-blue-600/20 to-blue-500/10',
+      iconBg: 'bg-blue-500/20',
+      iconColor: 'text-blue-400'
+    },
+    { 
+      label: 'Open Rate', 
+      value: '0%',
+      icon: Eye,
+      gradient: 'from-purple-600/20 to-purple-500/10',
+      iconBg: 'bg-purple-500/20',
+      iconColor: 'text-purple-400'
+    },
+    { 
+      label: 'Reply Rate', 
+      value: '0%',
+      icon: MessageCircle,
+      gradient: 'from-green-600/20 to-green-500/10',
+      iconBg: 'bg-green-500/20',
+      iconColor: 'text-green-400'
+    },
+  ]
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="md:flex md:items-center md:justify-between">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Campaigns</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage your email outreach campaigns</p>
+          <h1 className="text-3xl font-bold">Campaigns</h1>
+          <p className="text-gray-400 mt-1">Manage your email outreach campaigns</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="mt-4 flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700 md:mt-0"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 font-medium hover:opacity-90 transition-opacity"
         >
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="w-5 h-5" />
           New Campaign
         </button>
       </div>
 
-      {/* Campaigns Grid */}
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-3">
+        {stats.map((stat, i) => (
+          <div 
+            key={i}
+            className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradient} border border-white/10 p-6`}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className={`w-12 h-12 rounded-xl ${stat.iconBg} flex items-center justify-center`}>
+                <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
+            <div className="text-sm text-gray-400">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Campaigns */}
       {campaigns.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {campaigns.map((campaign) => (
             <div
               key={campaign.id}
-              className="rounded-xl bg-white p-6 shadow-sm hover:shadow-md transition-shadow"
+              className="group rounded-2xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 hover:border-purple-500/50 transition-all p-6"
             >
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="font-semibold text-gray-900">{campaign.name}</h3>
-                  <span className={`mt-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_STYLES[campaign.status]?.bg} ${STATUS_STYLES[campaign.status]?.text}`}>
+                  <h3 className="font-semibold text-lg">{campaign.name}</h3>
+                  <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
+                    campaign.status === 'running' ? 'bg-green-500/20 text-green-400' :
+                    campaign.status === 'draft' ? 'bg-gray-500/20 text-gray-400' :
+                    campaign.status === 'completed' ? 'bg-blue-500/20 text-blue-400' :
+                    'bg-yellow-500/20 text-yellow-400'
+                  }`}>
                     {campaign.status}
                   </span>
                 </div>
                 <div className="flex gap-2">
                   {campaign.status === 'draft' && (
-                    <button className="rounded p-1 text-green-600 hover:bg-green-50">
-                      <Play className="h-5 w-5" />
+                    <button className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30 transition-colors">
+                      <Play className="w-4 h-4" />
                     </button>
                   )}
                   {campaign.status === 'running' && (
-                    <button className="rounded p-1 text-yellow-600 hover:bg-yellow-50">
-                      <Pause className="h-5 w-5" />
+                    <button className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 transition-colors">
+                      <Pause className="w-4 h-4" />
                     </button>
                   )}
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <p className="text-sm text-gray-500">Sent</p>
-                  <p className="mt-1 text-lg font-semibold text-gray-900">
-                    {campaign.sent_count} <span className="text-sm font-normal text-gray-400">/ {campaign.total_leads}</span>
+                  <p className="text-lg font-semibold text-white">
+                    {campaign.sent_count} <span className="text-sm font-normal text-gray-500">/ {campaign.total_leads}</span>
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Open Rate</p>
-                  <p className="mt-1 text-lg font-semibold text-gray-900">
+                  <p className="text-lg font-semibold text-white">
                     {campaign.sent_count > 0 ? ((campaign.opened_count / campaign.sent_count) * 100).toFixed(1) : 0}%
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Reply Rate</p>
-                  <p className="mt-1 text-lg font-semibold text-gray-900">
+                  <p className="text-lg font-semibold text-white">
                     {campaign.sent_count > 0 ? ((campaign.replied_count / campaign.sent_count) * 100).toFixed(1) : 0}%
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Created</p>
-                  <p className="mt-1 text-sm text-gray-600">
-                    {new Date(campaign.created_at).toLocaleDateString()}
-                  </p>
+                  <p className="text-sm text-gray-400">{new Date(campaign.created_at).toLocaleDateString()}</p>
                 </div>
               </div>
 
-              <div className="mt-4 flex gap-2">
-                <button className="flex flex-1 items-center justify-center rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  <Mail className="mr-2 h-4 w-4" />
-                  View Emails
+              <div className="flex gap-2">
+                <button className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-purple-500/50 transition-all text-sm">
+                  <Mail className="w-4 h-4" />
+                  Emails
                 </button>
-                <button className="flex flex-1 items-center justify-center rounded-lg border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  <BarChart3 className="mr-2 h-4 w-4" />
+                <button className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-purple-500/50 transition-all text-sm">
+                  <BarChart3 className="w-4 h-4" />
                   Analytics
                 </button>
               </div>
@@ -113,62 +152,23 @@ export default function Campaigns() {
           ))}
         </div>
       ) : (
-        <div className="rounded-xl bg-white py-16 text-center shadow-sm">
-          <div className="mx-auto h-16 w-16 rounded-full bg-gray-100 p-4">
-            <Send className="h-8 w-8 text-gray-400" />
+        <div className="rounded-2xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 p-16 text-center">
+          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center mb-6">
+            <Send className="w-10 h-10 text-purple-400" />
           </div>
-          <h3 className="mt-4 text-lg font-medium text-gray-900">No campaigns yet</h3>
-          <p className="mt-2 text-sm text-gray-500">
-            Create your first email campaign to start reaching out to leads
+          <h3 className="text-xl font-semibold mb-2">No campaigns yet</h3>
+          <p className="text-gray-400 mb-6 max-w-md mx-auto">
+            Create your first email campaign to start reaching out to leads and growing your business.
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="mt-6 inline-flex items-center rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 font-medium hover:opacity-90 transition-opacity"
           >
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="w-5 h-5" />
             Create Campaign
           </button>
         </div>
       )}
-
-      {/* Quick Stats */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <div className="rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-blue-100">Total Sent</p>
-              <p className="mt-2 text-3xl font-bold">0</p>
-            </div>
-            <div className="rounded-full bg-white/20 p-3">
-              <Send className="h-6 w-6" />
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-xl bg-gradient-to-br from-green-500 to-green-600 p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-green-100">Avg Open Rate</p>
-              <p className="mt-2 text-3xl font-bold">0%</p>
-            </div>
-            <div className="rounded-full bg-white/20 p-3">
-              <Mail className="h-6 w-6" />
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-purple-100">Total Replies</p>
-              <p className="mt-2 text-3xl font-bold">0</p>
-            </div>
-            <div className="rounded-full bg-white/20 p-3">
-              <Users className="h-6 w-6" />
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
